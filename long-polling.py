@@ -28,7 +28,6 @@ def send_message(chat_id, text):
     data = {"chat_id": chat_id, "text": text}
     requests.post(url, data=data)
 
-
 """
 Added by AkshitBhandari - 27016
 This function uses and API to fetch an joke from the joke API 
@@ -53,14 +52,14 @@ def main():
             message = update.get("message")
             chat_id = message.get("chat", {}).get("id", None)
             text = message.get("text", "").strip().lower()
+            
             # Add your command in this block by using elif
-            if message and message.get("text", "").strip() == "/start":
+            if text == "/start":
                 greeting = random.choice(greetings)
                 send_message(chat_id, greeting)
             elif text == "/joke":
                 """
-                Added by AkshitBhandari - 27016
-                This block check if the command /joke is typed by the user while using the bot and helps us to send the message or joke (refer line 66)
+                This block checks if the command /joke is typed by the user while using the bot and helps us to send the joke (refer line 66)
                 """
                 joke = get_joke()
                 send_message(chat_id, joke)
