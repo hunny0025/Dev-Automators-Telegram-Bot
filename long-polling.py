@@ -42,8 +42,6 @@ def main():
             if message and message.get("text", "").strip() == "/start":
                 greeting = random.choice(greetings)
                 send_message(chat_id, greeting)
-            elif message and message.get("text", "").strip() == "/help":
-                send_message(chat_id, "Help")
             else:
                 send_message(chat_id, "Invalid message")
 
