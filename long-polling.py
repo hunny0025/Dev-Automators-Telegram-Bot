@@ -26,7 +26,7 @@ def get_updates(offset=None):
 def send_message(chat_id, text):
     url = BASE_URL + "sendMessage"
     data = {"chat_id": chat_id, "text": text}
-    response = requests.post(url, data=data)
+    requests.post(url, data=data)
 
 def main():
     update_id = None
