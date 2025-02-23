@@ -91,7 +91,38 @@ def get_github_repo(repo_path):
         )
     else:
         return "❌ Repository not found."
+
+def get_devians_details(roll_no):
+    """
+    Fetches student details from contributors.txt on GitHub using roll number.
+    """
+    file_url = "https://raw.githubusercontent.com/adarshkr357/DevInnovators-FirstOpenSourceCommit/main/contributors.txt"
     
+    response = requests.get(file_url)
+    
+    if response.status_code == 200:
+        lines = response.text.split("\n")
+        devians = []
+        
+        for line in lines:
+            if f"Roll: {roll_no}" in line:
+                devians.append(line)
+                break
+        
+        if devians:
+            devians_data = "\n".join(devians).replace(",","\n")\
+                                             .replace("Name:", "📝 Name:") \
+                                             .replace("Roll:", "🎓 Roll:") \
+                                             .replace("Branch:", "🏛 Branch:") \
+                                             .replace("Section:", "📚 Section:") \
+                                             .replace("Email:", "📩 Email:")
+
+            return f"📌 <b>Devians Details:</b>\n{devians_data}"
+        else:
+            return "❌ Devians not found!"
+    
+    return "❌ Unable to fetch devians data. Try again later!"   
+
 def main():
     update_id = None
     print("Bot started...")
@@ -110,6 +141,15 @@ def main():
             if text == "/start":
                 greeting = random.choice(greetings)
                 send_message(chat_id, greeting, message_id)
+            
+            elif text.startswith("/devians "):
+                """
+                Fetches student details from contributors.txt on GitHub using roll number.
+                use = /devians <roll_no> - Get Devians details using roll number
+                """
+                roll_no = text.split(" ", 1)[1]
+                devians_info = get_devians_details(roll_no)
+                send_message(chat_id, devians_info, message_id)
 
             elif text.startswith("/github"):
                 """
