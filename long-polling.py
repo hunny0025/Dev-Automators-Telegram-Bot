@@ -37,6 +37,20 @@ def send_message(chat_id, text, reply_to_message_id=None, disable_web_page_previ
 
     requests.post(url, data=data)
 
+def send_photo(chat_id, photo, caption=None):
+    """
+    Added this in order to convert URL into an image
+    """
+    url = BASE_URL + "sendPhoto"
+    data = {
+        "chat_id": chat_id,
+        "photo": photo,  
+    }
+    if caption:
+        data["caption"] = caption  
+    
+    requests.post(url, data=data)
+
 def get_joke():
     """
     This function uses and API to fetch an joke from the joke API 
@@ -91,6 +105,19 @@ def get_github_repo(repo_path):
         )
     else:
         return "❌ Repository not found."
+
+
+def get_cat_image():
+    """
+    Gets a photo of a cat from the Cat API
+    """
+    cat_api_url = "https://api.thecatapi.com/v1/images/search"
+    response = requests.get(cat_api_url)
+    if response.status_code == 200:
+        cat_data = response.json()
+        return cat_data[0]["url"]  
+    return "Sorry, The cats are sleeping, try again later"
+
     
 def main():
     update_id = None
@@ -133,7 +160,14 @@ def main():
                 """
                 joke = get_joke()
                 send_message(chat_id, joke, message_id)
+
+            elif text == "/cat":
                 
+                """
+                It will give a random cat image
+                """
+                cat_image_url = get_cat_image()
+                send_photo(chat_id, cat_image_url, caption="Here's a awe-some cat for you!") 
             else:
                 send_message(chat_id, "Invalid message", message_id)
 
