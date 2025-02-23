@@ -42,6 +42,46 @@ def get_joke():
         return f"{joke_data['setup']}\n{joke_data['punchline']}"
     return "Sorry, I couldn't fetch a joke at the moment."
 
+def get_github_profile(username):
+    """Gets GitHub user details like profile link, public repos, 
+    and followers.Converts username to lowercase to avoid errors.
+    use = /github <username> - Get GitHub user details (profile, repos, followers) 
+    """
+    username= username.lower()
+    url = f"https://api.github.com/users/{username}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        return (
+            f"🏷 *GitHub Profile:* {data['login']}\n"
+            f"🔗 [Profile Link]({data['html_url']})\n"
+            f"🏆 *Public Repos:* {data['public_repos']}\n"
+            f"👥 *Followers:* {data['followers']}"
+        )
+    else:
+        return "❌ GitHub user not found."
+
+def get_github_repo(repo_path):
+    """Gets GitHub repo details like stars, forks, and last updated date.
+    Converts repo path to lowercase to avoid errors.
+    use = /github repo <owner/repo> - Get GitHub repository details (stars, forks, last update)  
+     """
+    repo_path = repo_path.lower()
+    url = f"https://api.github.com/repos/{repo_path}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        return (
+            f"📌 *Repository:* {data['name']}\n"
+            f"🔗 [Repo Link]({data['html_url']})\n"
+            f"⭐ *Stars:* {data['stargazers_count']}\n"
+            f"🍴 *Forks:* {data['forks_count']}\n"
+            f"📅 *Last Updated:* {data['updated_at'][:10]}"
+        )
+    else:
+        return "❌ Repository not found."
+    
 def main():
     update_id = None
     print("Bot started...")
@@ -50,6 +90,8 @@ def main():
         for update in updates.get("result", []):
             update_id = update["update_id"] + 1
             message = update.get("message")
+            if not message:
+                continue
             chat_id = message.get("chat", {}).get("id", None)
             text = message.get("text", "").strip().lower()
             
@@ -57,6 +99,22 @@ def main():
             if text == "/start":
                 greeting = random.choice(greetings)
                 send_message(chat_id, greeting)
+            elif text.startswith("/github"):
+                """
+                Gets GitHub user details like profile link, public repos, and followers.
+                Converts username to lowercase to avoid errors.
+                """
+                inpu = text.split()
+                if len(inpu) == 2:
+                    username = inpu[1]
+                    response = get_github_profile(username)
+                elif len(inpu) == 3 and inpu[1] == "repo" :
+                    repo_path = inpu[2]
+                    response = get_github_repo(repo_path)
+                else:
+                    response = "ℹ️ Usage: `/github <username>` or `/github repo <username>/<repo>`"
+                send_message(chat_id, response)
+
             elif text == "/joke":
                 """
                 This block checks if the command /joke is typed by the user while using the bot and helps us to send the joke (refer line 66)
