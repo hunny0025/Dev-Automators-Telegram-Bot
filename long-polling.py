@@ -142,10 +142,10 @@ def main():
                 greeting = random.choice(greetings)
                 send_message(chat_id, greeting, message_id)
             
-            elif text.startswith("/devians "):
+            elif text.startswith("/devian "):
                 """
                 Fetches student details from contributors.txt on GitHub using roll number.
-                use = /devians <roll_no> - Get Devians details using roll number
+                use = /devian <roll_no> - Get Devians details using roll number
                 """
                 roll_no = text.split(" ", 1)[1]
                 devians_info = get_devians_details(roll_no)
