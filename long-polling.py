@@ -23,18 +23,26 @@ def get_updates(offset=None):
     response = requests.get(url, params=params).json()
     return response
 
-def send_message(chat_id, text):
+def send_message(chat_id, text, reply_to_message_id=None, disable_web_page_preview=True):
     url = BASE_URL + "sendMessage"
-    data = {"chat_id": chat_id, "text": text}
+    data = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": disable_web_page_preview # Disables the preview by default
+    }
+    
+    if reply_to_message_id:
+        data["reply_to_message_id"] = reply_to_message_id  # Reply to user's message
+
     requests.post(url, data=data)
 
-"""
-Added by AkshitBhandari - 27016
-This function uses and API to fetch an joke from the joke API 
-It basically provides us with a python dictionary that has keys like type, setup and punchline which contains specific string (or we can say the main content or joke)
-This data will be called to show up the joke as I did in line 43 of code
-"""
 def get_joke():
+    """
+    This function uses and API to fetch an joke from the joke API 
+    It basically provides us with a python dictionary that has keys like type, setup and punchline which contains specific string (or we can say the main content or joke)
+    This data will be called to show up the joke as I did in line 43 of code
+    """
     joke_url = "https://official-joke-api.appspot.com/jokes/random"
     response = requests.get(joke_url)
     if response.status_code == 200:
@@ -43,7 +51,8 @@ def get_joke():
     return "Sorry, I couldn't fetch a joke at the moment."
 
 def get_github_profile(username):
-    """Gets GitHub user details like profile link, public repos, 
+    """
+    Gets GitHub user details like profile link, public repos, 
     and followers.Converts username to lowercase to avoid errors.
     use = /github <username> - Get GitHub user details (profile, repos, followers) 
     """
@@ -53,19 +62,20 @@ def get_github_profile(username):
     if response.status_code == 200:
         data = response.json()
         return (
-            f"🏷 *GitHub Profile:* {data['login']}\n"
-            f"🔗 [Profile Link]({data['html_url']})\n"
-            f"🏆 *Public Repos:* {data['public_repos']}\n"
-            f"👥 *Followers:* {data['followers']}"
+            f"🏷 <b>GitHub Profile:</b> {data['login']}\n"
+            f"🔗 <a href=\"{data['html_url']}\">Profile Link</a>\n"
+            f"🏆 <b>Public Repos:</b> {data['public_repos']}\n"
+            f"👥 <b>Followers:</b> {data['followers']}"
         )
     else:
         return "❌ GitHub user not found."
 
 def get_github_repo(repo_path):
-    """Gets GitHub repo details like stars, forks, and last updated date.
+    """
+    Gets GitHub repo details like stars, forks, and last updated date.
     Converts repo path to lowercase to avoid errors.
     use = /github repo <owner/repo> - Get GitHub repository details (stars, forks, last update)  
-     """
+    """
     repo_path = repo_path.lower()
     url = f"https://api.github.com/repos/{repo_path}"
     response = requests.get(url)
@@ -73,11 +83,11 @@ def get_github_repo(repo_path):
     if response.status_code == 200:
         data = response.json()
         return (
-            f"📌 *Repository:* {data['name']}\n"
-            f"🔗 [Repo Link]({data['html_url']})\n"
-            f"⭐ *Stars:* {data['stargazers_count']}\n"
-            f"🍴 *Forks:* {data['forks_count']}\n"
-            f"📅 *Last Updated:* {data['updated_at'][:10]}"
+            f"📌 <b>Repository:</b> {data['name']}\n"
+            f"🔗 <a href=\"{data['html_url']}\">Repo Link</a>\n"
+            f"⭐ <b>Stars:</b> {data['stargazers_count']}\n"
+            f"🍴 <b>Forks:</b> {data['forks_count']}\n"
+            f"📅 <b>Last Updated:</b> {data['updated_at'][:10]}"
         )
     else:
         return "❌ Repository not found."
@@ -92,13 +102,15 @@ def main():
             message = update.get("message")
             if not message:
                 continue
+            message_id = message.get("message_id")
             chat_id = message.get("chat", {}).get("id", None)
             text = message.get("text", "").strip().lower()
             
             # Add your command in this block by using elif
             if text == "/start":
                 greeting = random.choice(greetings)
-                send_message(chat_id, greeting)
+                send_message(chat_id, greeting, message_id)
+
             elif text.startswith("/github"):
                 """
                 Gets GitHub user details like profile link, public repos, and followers.
@@ -113,16 +125,17 @@ def main():
                     response = get_github_repo(repo_path)
                 else:
                     response = "ℹ️ Usage: `/github <username>` or `/github repo <username>/<repo>`"
-                send_message(chat_id, response)
+                send_message(chat_id, response, message_id)
 
             elif text == "/joke":
                 """
                 This block checks if the command /joke is typed by the user while using the bot and helps us to send the joke (refer line 66)
                 """
                 joke = get_joke()
-                send_message(chat_id, joke)
+                send_message(chat_id, joke, message_id)
+                
             else:
-                send_message(chat_id, "Invalid message")
+                send_message(chat_id, "Invalid message", message_id)
 
         time.sleep(0.5)
 
