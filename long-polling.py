@@ -243,22 +243,21 @@ def main():
 				send_message(chat_id, joke, message_id)
 
 			elif text == "/cat":
-				
 				"""
 				It will give a random cat image
 				"""
 				cat_image_url = get_cat_image()
-				send_photo(chat_id, cat_image_url, message_id, caption="Here's a awe-some cat for you!") 
-				            elif text == "/ipl":
-                send_message(chat_id, get_kkr_history(), message_id)
+				send_photo(chat_id, cat_image_url, message_id, caption="Here's a awe-some cat for you!")
 
-                     elif text.startswith("/iplstats "):
-                     player_name = text.split("/iplstats ", 1)[1].strip()
-                     send_message(chat_id, get_kkr_player_stats(player_name), message_id)
+			elif text == "/ipl":
+				send_message(chat_id, get_kkr_history(), message_id)
 
-            
-		else:
-			send_message(chat_id, "Invalid message", message_id)
+			elif text.startswith("/iplstats "):
+				player_name = text.split("/iplstats ", 1)[1].strip()
+				send_message(chat_id, get_kkr_player_stats(player_name), message_id)
+
+			else:
+				send_message(chat_id, "Invalid message", message_id)
 
 		time.sleep(0.5)
 
