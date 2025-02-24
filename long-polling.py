@@ -156,6 +156,41 @@ def get_devians_details(roll_no):
 	
 	return "❌ Unable to fetch devians data. Try again later!"
 
+
+def get_kkr_history():
+    return (
+        "🏏 <b>History of Kolkata Knight Riders (KKR)</b>\n\n"
+        "📅 <b>Founded:</b> 2008\n"
+        "🎭 <b>Owners:</b> Red Chillies Entertainment & Mehta Group\n"
+        "🏟 <b>Home Ground:</b> Eden Gardens, Kolkata\n\n"
+        "🏆 <b>IPL Titles:</b> 2012, 2014, 2024\n"
+        "📜 <b>Legacy:</b> KKR is known for its passionate fanbase, unique playing style, and never-give-up attitude!\n\n"
+        "🔗 <a href='https://www.kkr.in/'>Official Website</a>"
+    )
+
+
+def get_kkr_player_stats(player_name):
+    player_name = player_name.lower().replace(" ", "-")
+    url = f"https://api.cricapi.com/v1/players?name={player_name}&apikey=YOUR_API_KEY"
+
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        if "data" in data and len(data["data"]) > 0:
+            player = data["data"][0]
+            return (
+                f"📊 <b>Player Stats for {player['name']}</b>\n\n"
+                f"🏏 <b>Matches Played:</b> {player.get('matches', 'N/A')}\n"
+                f"⚡ <b>Runs Scored:</b> {player.get('runs', 'N/A')}\n"
+                f"🎯 <b>Wickets Taken:</b> {player.get('wickets', 'N/A')}\n"
+                f"🔗 <a href='{player.get('profile', '#')}'>More Details</a>"
+            )
+        else:
+            return "❌ Player not found in KKR database."
+    return "❌ Unable to fetch player statistics. Try again later!"
+
+
+
 def main():
 	update_id = None
 	print("Bot started...")
@@ -214,8 +249,16 @@ def main():
 				"""
 				cat_image_url = get_cat_image()
 				send_photo(chat_id, cat_image_url, message_id, caption="Here's a awe-some cat for you!") 
-			else:
-				send_message(chat_id, "Invalid message", message_id)
+				            elif text == "/ipl":
+                send_message(chat_id, get_kkr_history(), message_id)
+
+                     elif text.startswith("/iplstats "):
+                     player_name = text.split("/iplstats ", 1)[1].strip()
+                     send_message(chat_id, get_kkr_player_stats(player_name), message_id)
+
+            
+		else:
+			send_message(chat_id, "Invalid message", message_id)
 
 		time.sleep(0.5)
 
