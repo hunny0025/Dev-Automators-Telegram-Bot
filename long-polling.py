@@ -6,8 +6,10 @@ import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
+BOT_TOKEN = os.getenv("7588095044:AAEOLaldcxU8-hen5QTFp8iKuVuuvqKMGUo")
+BASE_URL = "https://api.telegram.org/bot" + "7588095044:AAEOLaldcxU8-hen5QTFp8iKuVuuvqKMGUo/"
+
+
 
 greetings = [
     "Hello!",
@@ -16,6 +18,15 @@ greetings = [
     "Salutations!",
     "Howdy!"
 ]
+
+questions = [
+    {"question": "What comes next in the sequence? 2, 4, 8, 16, ...", "answer": "32"},
+    {"question": "Which word doesn’t belong? Apple, Banana, Carrot, Mango", "answer": "Carrot"},
+    {"question": "What is 15 + 28?", "answer": "43"}
+]
+
+user_scores = {}
+user_progress = {}
 
 def get_updates(offset=None):
     url = BASE_URL + "getUpdates"
@@ -28,19 +39,25 @@ def send_message(chat_id, text):
     data = {"chat_id": chat_id, "text": text}
     requests.post(url, data=data)
 
-"""
-Added by AkshitBhandari - 27016
-This function uses and API to fetch an joke from the joke API 
-It basically provides us with a python dictionary that has keys like type, setup and punchline which contains specific string (or we can say the main content or joke)
-This data will be called to show up the joke as I did in line 43 of code
-"""
-def get_joke():
-    joke_url = "https://official-joke-api.appspot.com/jokes/random"
-    response = requests.get(joke_url)
-    if response.status_code == 200:
-        joke_data = response.json()
-        return f"{joke_data['setup']}\n{joke_data['punchline']}"
-    return "Sorry, I couldn't fetch a joke at the moment."
+def ask_question(chat_id, user_id):
+    index = user_progress.get(user_id, 0)
+    if index < len(questions):
+        send_message(chat_id, questions[index]['question'])
+    else:
+        score = user_scores.get(user_id, 0)
+        send_message(chat_id, f"✅ Test completed! Your score: {score}/{len(questions)} 🎉")
+
+def handle_answer(chat_id, user_id, text):
+    index = user_progress.get(user_id, 0)
+    if index < len(questions):
+        correct_answer = questions[index]['answer']
+        if text.lower() == correct_answer.lower():
+            user_scores[user_id] = user_scores.get(user_id, 0) + 1
+            send_message(chat_id, "✅ Correct!")
+        else:
+            send_message(chat_id, f"❌ Incorrect. The right answer was: {correct_answer}")
+        user_progress[user_id] = index + 1
+        ask_question(chat_id, user_id)
 
 def main():
     update_id = None
@@ -52,21 +69,22 @@ def main():
             message = update.get("message")
             chat_id = message.get("chat", {}).get("id", None)
             text = message.get("text", "").strip().lower()
-            
-            # Add your command in this block by using elif
+            user_id = chat_id
+
             if text == "/start":
                 greeting = random.choice(greetings)
-                send_message(chat_id, greeting)
+                user_progress[user_id] = 0
+                user_scores[user_id] = 0
+                send_message(chat_id, greeting + " Let's begin the IQ test!")
+                ask_question(chat_id, user_id)
             elif text == "/joke":
-                """
-                This block checks if the command /joke is typed by the user while using the bot and helps us to send the joke (refer line 66)
-                """
                 joke = get_joke()
                 send_message(chat_id, joke)
             else:
-                send_message(chat_id, "Invalid message")
+                handle_answer(chat_id, user_id, text)
 
         time.sleep(0.5)
+
 
 if __name__ == "__main__":
     polling_thread = threading.Thread(target=main)
