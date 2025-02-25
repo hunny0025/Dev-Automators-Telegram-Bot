@@ -39,9 +39,8 @@ def send_message(chat_id, text, reply_to_message_id=None, disable_web_page_previ
 		data["reply_to_message_id"] = reply_to_message_id  # Reply to user's message
 
 	requests.post(url, data=data)
-
-
-def send_photo(chat_id, photo, reply_to_message_id=None, caption=None, disable_web_page_preview=True):
+  
+  def send_photo(chat_id, photo, reply_to_message_id=None, caption=None, disable_web_page_preview=True):
 	"""
 	Added this in order to convert URL into an image
 	"""
@@ -259,6 +258,7 @@ def main():
 			elif text.startswith("/iplstats "):
 				player_name = text.split("/iplstats ", 1)[1].strip()
 				send_message(chat_id, get_kkr_player_stats(player_name), message_id)
+
 			elif text == "/help":
 				help_text = "Available commands:\n/start - Start the bot\n/help - Show this help message\n/joke - Get a random joke\n/time - Get the current time\n/cat - Get a random cat image"
 				send_message(chat_id, help_text, message_id)
