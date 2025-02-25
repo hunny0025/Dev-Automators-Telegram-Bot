@@ -7,14 +7,14 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-NEWS_API_KEY = os.getenv("NewsAPI_KEY")
-if not BOT_TOKEN:
-    raise ValueError("Bot_Token environment variable is not set")
-if not NEWS_API_KEY:
-    raise ValueError("newsAPI environment variable is not set")
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN not found. Please set it in .env file.")
+NEWS_API_KEY = os.getenv("NewsAPI_KEY")
+if not NEWS_API_KEY:
+    print("NEWS_API_KEY not found. Please set it in .env file.")
+
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
 NEWS_URL = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={NEWS_API_KEY}"
 
@@ -129,7 +129,6 @@ def get_github_repo(repo_path):
 	else:
 		return "❌ Repository not found."
 
-
 def get_cat_image():
 	"""
 	Gets a photo of a cat from the Cat API
@@ -140,7 +139,6 @@ def get_cat_image():
 		cat_data = response.json()
 		return cat_data[0]["url"]
 	return "Sorry, The cats are sleeping, try again later"
-
 
 def get_devians_details(roll_no):
 	"""
@@ -173,7 +171,6 @@ def get_devians_details(roll_no):
 	
 	return "❌ Unable to fetch devians data. Try again later!"
 
-
 def get_kkr_history():
     return (
         "🏏 <b>History of Kolkata Knight Riders (KKR)</b>\n\n"
@@ -184,7 +181,6 @@ def get_kkr_history():
         "📜 <b>Legacy:</b> KKR is known for its passionate fanbase, unique playing style, and never-give-up attitude!\n\n"
         "🔗 <a href='https://www.kkr.in/'>Official Website</a>"
     )
-
 
 def get_kkr_player_stats(player_name):
     player_name = player_name.lower().replace(" ", "-")
@@ -206,7 +202,24 @@ def get_kkr_player_stats(player_name):
             return "❌ Player not found in KKR database."
     return "❌ Unable to fetch player statistics. Try again later!"
 
-
+def get_help_message():
+    """
+    Returns a help message listing all available commands and their usage.
+    """
+    return (
+        "📌 <b>Available Commands:</b>\n\n"
+        "🔹 <b>/start</b> - Start the bot and receive a greeting\n"
+        "🔹 <b>/help</b> - Show this help message\n"
+        "🔹 <b>/news</b> - Get the latest news headlines\n"
+        "🔹 <b>/joke</b> - Get a random joke\n"
+        "🔹 <b>/cat</b> - Get a random cat image\n\n"
+        "🔹 <b>/github &lt;username&gt;</b> - Get GitHub user details (profile, repos, followers)\n"
+        "🔹 <b>/github repo &lt;owner/repo&gt;</b> - Get GitHub repository details (stars, forks, last update)\n"
+        "🔹 <b>/devian &lt;roll_no&gt;</b> - Get Devians details using roll number\n\n"
+        "🔹 <b>/ipl</b> - Get history and details about Kolkata Knight Riders (KKR)\n"
+        "🔹 <b>/iplstats &lt;player_name&gt;</b> - Get KKR player's statistics\n\n"
+        "ℹ️ <i>Type a command to get started!</i>"
+    )
 
 def main():
 	update_id = None
@@ -273,15 +286,17 @@ def main():
 				player_name = text.split("/iplstats ", 1)[1].strip()
 				send_message(chat_id, get_kkr_player_stats(player_name), message_id)
 
-			elif text == "/help":
-				help_text = "Available commands:\n/start - Start the bot\n/help - Show this help message\n/joke - Get a random joke\n/time - Get the current time\n/cat - Get a random cat image\n/news - Get the latest news"
-				send_message(chat_id, help_text, message_id)
-			elif text == "/time":
-				current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-				send_message(chat_id, f"Today Date and current time is {current_time}", message_id)
 			elif text == "/news":
 				news = get_news()
-				send_message(chat_id, news, message_id)  
+				send_message(chat_id, news, message_id)
+
+			elif text == "/help":
+				"""
+				Sends a list of available commands when the user types /help
+				"""
+				help_message = get_help_message()
+				send_message(chat_id, help_message, message_id)
+				 
 			else:
 				send_message(chat_id, "Invalid message", message_id)
 
