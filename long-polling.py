@@ -272,7 +272,7 @@ def main():
 				player_name = text.split("/iplstats ", 1)[1].strip()
 				send_message(chat_id, get_kkr_player_stats(player_name), message_id)
 			elif text == "/help":
-				help_text = "Available commands:\n/start - Start the bot\n/help - Show this help message\n/joke - Get a random joke\n/time - Get the current time\n/cat - Get a random cat image"
+				help_text = "Available commands:\n/start - Start the bot\n/help - Show this help message\n/joke - Get a random joke\n/time - Get the current time\n/cat - Get a random cat image\n/news - Get the latest news"
 				send_message(chat_id, help_text, message_id)
 			elif text == "/time":
 				current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
