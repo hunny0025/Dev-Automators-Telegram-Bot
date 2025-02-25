@@ -8,9 +8,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+NEWS_API_KEY = os.getenv("NewsAPI_KEY")
 if not BOT_TOKEN:
     raise ValueError("Bot_Token environment variable is not set")
+if not NEWS_API_KEY:
+    raise ValueError("newsAPI environment variable is not set")
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
+NEWS_URL = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={NEWS_API_KEY}"
 
 greetings = [
 	"Hello!",
@@ -25,6 +29,14 @@ def get_updates(offset=None):
 	params = {"timeout": 100, "offset": offset}
 	response = requests.get(url, params=params).json()
 	return response
+
+def get_news():
+    params = {"apikey": NEWS_API_KEY,"country": "us", "category": "general", "pageSize": 5}
+    response = requests.get(NEWS_URL, params=params)
+    news_data = response.json()
+    articles = news_data.get("articles", [])
+    news_list =[f"{article['title']} - {article['source']['name']}" for article in articles]
+    return "\n".join(news_list)
 
 def send_message(chat_id, text, reply_to_message_id=None, disable_web_page_preview=True):
 	url = BASE_URL + "sendMessage"
@@ -265,6 +277,9 @@ def main():
 			elif text == "/time":
 				current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 				send_message(chat_id, f"Today Date and current time is {current_time}", message_id)
+			elif text == "/news":
+				news = get_news()
+				send_message(chat_id, news, message_id)  
 			else:
 				send_message(chat_id, "Invalid message", message_id)
 
