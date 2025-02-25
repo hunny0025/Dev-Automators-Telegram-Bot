@@ -17,10 +17,14 @@ def send_message(chat_id, text):
 
 def get_exchange_rate(text):
     parts = text.replace("/rate", "").strip().upper().split()
+    print(f"🔍 Extracted currencies: {parts}")  # Debug
     if len(parts) == 2:
         base, target = parts
         url = f"https://api.exchangerate.host/latest?base={base}&symbols={target}"
         response = requests.get(url)
+        print(f"🌐 API Request URL: {url}")  # Debug
+        print(f"📩 API Response: {response.json()}")  # Debug
+
         if response.status_code == 200:
             rates = response.json().get('rates', {})
             rate = rates.get(target)
@@ -38,10 +42,11 @@ def main():
         for update in updates.get("result", []):
             update_id = update["update_id"] + 1
             chat_id = update.get("message", {}).get("chat", {}).get("id")
-            text = update.get("message", {}).get("text", "").strip().lower()
-            if text.startswith("/start"):
+            text = update.get("message", {}).get("text", "").strip().upper()  # Consistent uppercase
+
+            if text.startswith("/START"):
                 send_message(chat_id, "👋 Welcome! Just type: /rate USD INR to get real-time rates.")
-            elif text.startswith("/rate"):
+            elif text.startswith("/RATE"):
                 send_message(chat_id, get_exchange_rate(text))
             else:
                 send_message(chat_id, "⚠️ Unknown command. Use: /rate USD INR")
