@@ -13,6 +13,8 @@ if not BOT_TOKEN:
     raise ValueError("Bot_Token environment variable is not set")
 if not NEWS_API_KEY:
     raise ValueError("newsAPI environment variable is not set")
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN not found. Please set it in .env file.")
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
 NEWS_URL = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={NEWS_API_KEY}"
 
