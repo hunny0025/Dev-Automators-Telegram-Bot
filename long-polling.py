@@ -11,7 +11,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN not found. Please set it in .env file.")
-NEWS_API_KEY = os.getenv("NewsAPI_KEY")
+NEWS_API_KEY = os.getenv("NEWS_API_KEY") # Get from https://newsapi.org/register
 if not NEWS_API_KEY:
     print("NEWS_API_KEY not found. Please set it in .env file.")
 
