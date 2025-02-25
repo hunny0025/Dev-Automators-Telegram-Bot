@@ -1,91 +1,51 @@
 import os
 import time
 import threading
-import random
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 BOT_TOKEN = os.getenv("7588095044:AAEOLaldcxU8-hen5QTFp8iKuVuuvqKMGUo")
-BASE_URL = "https://api.telegram.org/bot" + "7588095044:AAEOLaldcxU8-hen5QTFp8iKuVuuvqKMGUo/"
-
-
-
-greetings = [
-    "Hello!",
-    "Hi there!",
-    "Greetings!",
-    "Salutations!",
-    "Howdy!"
-]
-
-questions = [
-    {"question": "What comes next in the sequence? 2, 4, 8, 16, ...", "answer": "32"},
-    {"question": "Which word doesn’t belong? Apple, Banana, Carrot, Mango", "answer": "Carrot"},
-    {"question": "What is 15 + 28?", "answer": "43"}
-]
-
-user_scores = {}
-user_progress = {}
+BASE_URL = f"https://api.telegram.org/bot{"7588095044:AAEOLaldcxU8-hen5QTFp8iKuVuuvqKMGUo"}/"
 
 def get_updates(offset=None):
-    url = BASE_URL + "getUpdates"
-    params = {"timeout": 100, "offset": offset}
-    response = requests.get(url, params=params).json()
+    response = requests.get(BASE_URL + "getUpdates", params={"timeout": 100, "offset": offset}).json()
     return response
 
 def send_message(chat_id, text):
-    url = BASE_URL + "sendMessage"
-    data = {"chat_id": chat_id, "text": text}
-    requests.post(url, data=data)
+    requests.post(BASE_URL + "sendMessage", data={"chat_id": chat_id, "text": text})
 
-def ask_question(chat_id, user_id):
-    index = user_progress.get(user_id, 0)
-    if index < len(questions):
-        send_message(chat_id, questions[index]['question'])
-    else:
-        score = user_scores.get(user_id, 0)
-        send_message(chat_id, f"✅ Test completed! Your score: {score}/{len(questions)} 🎉")
-
-def handle_answer(chat_id, user_id, text):
-    index = user_progress.get(user_id, 0)
-    if index < len(questions):
-        correct_answer = questions[index]['answer']
-        if text.lower() == correct_answer.lower():
-            user_scores[user_id] = user_scores.get(user_id, 0) + 1
-            send_message(chat_id, "✅ Correct!")
-        else:
-            send_message(chat_id, f"❌ Incorrect. The right answer was: {correct_answer}")
-        user_progress[user_id] = index + 1
-        ask_question(chat_id, user_id)
+def get_exchange_rate(text):
+    parts = text.replace("/rate", "").strip().upper().split()
+    if len(parts) == 2:
+        base, target = parts
+        url = f"https://api.exchangerate.host/latest?base={base}&symbols={target}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            rates = response.json().get('rates', {})
+            rate = rates.get(target)
+            if rate:
+                return f"💱 1 {base} = {rate} {target}"
+            else:
+                return "⚡ Invalid currency codes. Example: /rate USD INR"
+    return "⚡ Usage: /rate USD INR"
 
 def main():
     update_id = None
-    print("Bot started...")
+    print("🤖 Bot started...")
     while True:
         updates = get_updates(offset=update_id)
         for update in updates.get("result", []):
             update_id = update["update_id"] + 1
-            message = update.get("message")
-            chat_id = message.get("chat", {}).get("id", None)
-            text = message.get("text", "").strip().lower()
-            user_id = chat_id
-
-            if text == "/start":
-                greeting = random.choice(greetings)
-                user_progress[user_id] = 0
-                user_scores[user_id] = 0
-                send_message(chat_id, greeting + " Let's begin the IQ test!")
-                ask_question(chat_id, user_id)
-            elif text == "/joke":
-                joke = get_joke()
-                send_message(chat_id, joke)
+            chat_id = update.get("message", {}).get("chat", {}).get("id")
+            text = update.get("message", {}).get("text", "").strip().lower()
+            if text.startswith("/start"):
+                send_message(chat_id, "👋 Welcome! Just type: /rate USD INR to get real-time rates.")
+            elif text.startswith("/rate"):
+                send_message(chat_id, get_exchange_rate(text))
             else:
-                handle_answer(chat_id, user_id, text)
-
+                send_message(chat_id, "⚠️ Unknown command. Use: /rate USD INR")
         time.sleep(0.5)
 
-
 if __name__ == "__main__":
-    polling_thread = threading.Thread(target=main)
-    polling_thread.start()
+    threading.Thread(target=main).start()
