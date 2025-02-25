@@ -3,13 +3,20 @@ import time
 import threading
 import random
 import requests
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+NEWS_API_KEY = os.getenv("NewsAPI_KEY")
+if not BOT_TOKEN:
+    raise ValueError("Bot_Token environment variable is not set")
+if not NEWS_API_KEY:
+    raise ValueError("newsAPI environment variable is not set")
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN not found. Please set it in .env file.")
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
+NEWS_URL = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={NEWS_API_KEY}"
 
 greetings = [
 	"Hello!",
@@ -25,6 +32,14 @@ def get_updates(offset=None):
 	response = requests.get(url, params=params).json()
 	return response
 
+def get_news():
+    params = {"apikey": NEWS_API_KEY,"country": "us", "category": "general", "pageSize": 5}
+    response = requests.get(NEWS_URL, params=params)
+    news_data = response.json()
+    articles = news_data.get("articles", [])
+    news_list =[f"{article['title']} - {article['source']['name']}" for article in articles]
+    return "\n".join(news_list)
+
 def send_message(chat_id, text, reply_to_message_id=None, disable_web_page_preview=True):
 	url = BASE_URL + "sendMessage"
 	data = {
@@ -38,7 +53,7 @@ def send_message(chat_id, text, reply_to_message_id=None, disable_web_page_previ
 		data["reply_to_message_id"] = reply_to_message_id  # Reply to user's message
 
 	requests.post(url, data=data)
-
+  
 def send_photo(chat_id, photo, reply_to_message_id=None, caption=None, disable_web_page_preview=True):
 	"""
 	Added this in order to convert URL into an image
@@ -258,6 +273,15 @@ def main():
 				player_name = text.split("/iplstats ", 1)[1].strip()
 				send_message(chat_id, get_kkr_player_stats(player_name), message_id)
 
+			elif text == "/help":
+				help_text = "Available commands:\n/start - Start the bot\n/help - Show this help message\n/joke - Get a random joke\n/time - Get the current time\n/cat - Get a random cat image\n/news - Get the latest news"
+				send_message(chat_id, help_text, message_id)
+			elif text == "/time":
+				current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+				send_message(chat_id, f"Today Date and current time is {current_time}", message_id)
+			elif text == "/news":
+				news = get_news()
+				send_message(chat_id, news, message_id)  
 			else:
 				send_message(chat_id, "Invalid message", message_id)
 
