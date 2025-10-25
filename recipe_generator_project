@@ -1,0 +1,131 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyOWqKvqHQULFJFO39o+qdxl",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/hunny0025/Dev-Automators-Telegram-Bot/blob/main/recipe_generator_project\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "s-l4AZ2NN-u0"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "import nltk\n",
+        "nltk.download('punkt')\n",
+        "nltk.download('vader_lexicon')\n",
+        "\n",
+        "from nltk.sentiment.vader import SentimentIntensityAnalyzer\n",
+        "import random\n",
+        "\n",
+        "quotes = {\n",
+        "    \"positive\": [\n",
+        "        \"Keep shining! Your positivity is your superpower 🌟\",\n",
+        "        \"Every day is another chance to grow. Keep going ✨\",\n",
+        "        \"Believe in yourself — you are capable of amazing things 💫\"\n",
+        "    ],\n",
+        "    \"negative\": [\n",
+        "        \"It’s okay to feel low. This moment will pass 🌙\",\n",
+        "        \"You are stronger than your struggles. Breathe and try again 🌿\",\n",
+        "        \"Even the darkest nights lead to the brightest mornings ☀️\"\n",
+        "    ],\n",
+        "    \"neutral\": [\n",
+        "        \"Progress is progress, no matter how small 💛\",\n",
+        "        \"Stay consistent. Small steps lead to big results 📈\",\n",
+        "        \"Your journey is unique. Trust the process 🌱\"\n",
+        "    ],\n",
+        "    \"sad\": [\n",
+        "        \"You deserve peace. Take things one moment at a time 🤍\",\n",
+        "        \"Crying doesn’t mean you’re weak — it means you’ve been strong for too long 💧\",\n",
+        "        \"Be gentle with yourself. Healing is not a race 🌼\"\n",
+        "    ],\n",
+        "    \"stressed\": [\n",
+        "        \"Pause. Breathe. You are doing the best you can 🕊️\",\n",
+        "        \"One step at a time. It’s okay to slow down 🌾\",\n",
+        "        \"Don’t carry the weight alone — you’re allowed to rest 🌙\"\n",
+        "    ]\n",
+        "}\n",
+        "\n",
+        "analyzer = SentimentIntensityAnalyzer()\n",
+        "\n",
+        "def get_emotion(text):\n",
+        "    scores = analyzer.polarity_scores(text)\n",
+        "    if scores['compound'] > 0.3:\n",
+        "        return \"positive\"\n",
+        "    elif scores['compound'] < -0.3:\n",
+        "        return \"negative\"\n",
+        "    elif \"sad\" in text.lower():\n",
+        "        return \"sad\"\n",
+        "    elif \"stress\" in text.lower() or \"pressure\" in text.lower():\n",
+        "        return \"stressed\"\n",
+        "    else:\n",
+        "        return \"neutral\"\n",
+        "\n",
+        "while True:\n",
+        "    print(\"\\nTell me how you're feeling (or type exit):\")\n",
+        "    user = input(\"> \")\n",
+        "    if user.lower() == \"exit\":\n",
+        "        break\n",
+        "\n",
+        "    emotion = get_emotion(user)\n",
+        "    print(\"\\n💬 Emotion Detected:\", emotion)\n",
+        "    print(\"\\n✨ Your Motivation:\\n\", random.choice(quotes[emotion]))\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "91d7emApMyGk",
+        "outputId": "d790736d-0196-4dce-a740-46e9ddf8540e"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "[nltk_data] Downloading package punkt to /root/nltk_data...\n",
+            "[nltk_data]   Unzipping tokenizers/punkt.zip.\n",
+            "[nltk_data] Downloading package vader_lexicon to /root/nltk_data...\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "Tell me how you're feeling (or type exit):\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
